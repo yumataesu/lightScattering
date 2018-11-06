@@ -174,8 +174,7 @@ class ofApp : public ofBaseApp {
     {
         ofGLFWWindowSettings settings;
         settings.setGLVersion(4, 1);
-        settings.width = 1280;
-        settings.height = 720;
+        settings.setSize(1280, 720);
         settings.resizable = false;
         ofCreateWindow(settings);
         
