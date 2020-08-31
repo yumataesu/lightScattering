@@ -26,7 +26,7 @@ class ofApp : public ofBaseApp {
     ofVec3f pos[NUM];
 
     ofFbo fbo;
-    bool bhide;
+    bool bhide = true;
     
     //--------------------------------------------------------------
     void setup()
@@ -76,7 +76,7 @@ class ofApp : public ofBaseApp {
     //--------------------------------------------------------------
     void draw()
     {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
 
@@ -115,25 +115,26 @@ class ofApp : public ofBaseApp {
         
         // post Effect
         // Alpha BLendering with Volumetric Light Scattering Effect
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        godray.begin();
-        godray.setUniformTexture("u_src", fbo.getTexture(), 0);
-        
-        ofVec2f screenSpaceLightPos = cam.worldToScreen(lightSphere.getPosition());
-        screenSpaceLightPos = screenSpaceLightPos / ofVec2f(WIDTH, HEIGHT);
-        godray.setUniform2f("u_screenSpaceLightPos", screenSpaceLightPos);
-        godray.setUniform1f("u_density", density);
-        godray.setUniform1f("u_weight", weight);
-        godray.setUniform1f("u_decay", decay);
-        godray.setUniform1f("u_exposure", exposure);
-        godray.setUniform1i("u_sampleNum", sampleNum);
-        quad.draw();
-        godray.end();
-        
-        
-        glDisable(GL_BLEND);
-        glDisable(GL_DEPTH_TEST);
+        if (cam.worldToScreen(lightSphere.getPosition()).z < 1) { // workaround from https://github.com/yumataesu/lightScattering/issues/3
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            godray.begin();
+            godray.setUniformTexture("u_src", fbo.getTexture(), 0);
+            ofVec2f screenSpaceLightPos = cam.worldToScreen(lightSphere.getPosition());
+            screenSpaceLightPos = screenSpaceLightPos / ofVec2f(WIDTH, HEIGHT);
+            godray.setUniform2f("u_screenSpaceLightPos", screenSpaceLightPos);
+            godray.setUniform1f("u_density", density);
+            godray.setUniform1f("u_weight", weight);
+            godray.setUniform1f("u_decay", decay);
+            godray.setUniform1f("u_exposure", exposure);
+            godray.setUniform1i("u_sampleNum", sampleNum);
+            quad.draw();
+            godray.end();
+
+
+            glDisable(GL_BLEND);
+            glDisable(GL_DEPTH_TEST);
+        }
         if(bhide) gui.draw();
     }
     
